@@ -15,6 +15,7 @@ import fileRoutes from './routes/fileRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import { initSocketServer } from './socket/socketServer.js';
+import { corsOrigin } from './utils/cors.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,7 +36,7 @@ app.use(
 // CORS configuration
 app.use(
   cors({
-    origin: [CLIENT_URL, 'http://localhost:5173', 'http://localhost:3000'],
+    origin: corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -81,14 +82,18 @@ app.use(errorHandler);
 // Initialize Socket.IO Server
 const io = initSocketServer(httpServer);
 
-// Start server
-httpServer.listen(PORT, () => {
-  console.log(`=========================================`);
-  console.log(`🚀 Real-Time Chat Server running on port ${PORT}`);
-  console.log(`📡 WebSocket ready on port ${PORT}`);
-  console.log(`🔒 Security layer active (Helmet + RateLimiter + JWT)`);
-  console.log(`💻 Client URL allowed: ${CLIENT_URL}`);
-  console.log(`=========================================`);
-});
+// Vercel serves the exported HTTP server as a function. Local and Docker runs
+// still own their listener and use the configured port.
+if (!process.env.VERCEL) {
+  httpServer.listen(PORT, () => {
+    console.log(`=========================================`);
+    console.log(`🚀 Real-Time Chat Server running on port ${PORT}`);
+    console.log(`📡 WebSocket ready on port ${PORT}`);
+    console.log(`🔒 Security layer active (Helmet + RateLimiter + JWT)`);
+    console.log(`💻 Client URL allowed: ${CLIENT_URL}`);
+    console.log(`=========================================`);
+  });
+}
 
 export { app, httpServer, io };
+export default httpServer;

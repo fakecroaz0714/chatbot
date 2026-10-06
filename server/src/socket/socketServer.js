@@ -6,13 +6,12 @@ import { socketAuthMiddleware } from './socketAuth.js';
 import { handlePresenceOnConnect, handlePresenceOnDisconnect } from './presenceHandler.js';
 import { registerMessageHandlers } from './messageHandler.js';
 import { registerTypingHandlers } from './typingHandler.js';
+import { corsOrigin } from '../utils/cors.js';
 
 export const initSocketServer = (httpServer) => {
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-
   const io = new Server(httpServer, {
     cors: {
-      origin: [clientUrl, 'http://localhost:5173', 'http://localhost:3000'],
+      origin: corsOrigin,
       credentials: true,
       methods: ['GET', 'POST'],
     },
