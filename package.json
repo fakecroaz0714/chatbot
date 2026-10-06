@@ -1,0 +1,13 @@
+{
+  "name": "pulsechat-monorepo",
+  "version": "1.0.0",
+  "description": "Event-driven real-time chat platform with Socket.IO, Redis, PostgreSQL, and AWS S3",
+  "scripts": {
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "dev": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['--prefix', 'server', 'run', 'dev'], { stdio: 'inherit', shell: true }); spawn('npm', ['--prefix', 'client', 'run', 'dev'], { stdio: 'inherit', shell: true });\"",
+    "build": "npm --prefix client run build",
+    "db:push": "npm --prefix server run prisma:push",
+    "db:postgres": "npm --prefix server run db:postgres"
+  }
+}

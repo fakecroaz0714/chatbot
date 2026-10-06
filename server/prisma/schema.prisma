@@ -1,0 +1,83 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String               @id @default(uuid())
+  username      String               @unique
+  email         String               @unique
+  password_hash String
+  avatar_url    String?
+  created_at    DateTime             @default(now())
+  updated_at    DateTime             @updatedAt
+
+  memberships   ConversationMember[]
+  messages      Message[]
+  read_receipts MessageRead[]
+
+  @@map("users")
+}
+
+model Conversation {
+  id         String               @id @default(uuid())
+  title      String?
+  type       String               @default("DIRECT") // DIRECT, GROUP
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+
+  members    ConversationMember[]
+  messages   Message[]
+
+  @@map("conversations")
+}
+
+model ConversationMember {
+  id              String       @id @default(uuid())
+  conversation_id String
+  user_id         String
+  joined_at       DateTime     @default(now())
+
+  conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([conversation_id, user_id])
+  @@map("conversation_members")
+}
+
+model Message {
+  id              String        @id @default(uuid())
+  conversation_id String
+  sender_id       String
+  content         String?
+  message_type    String        @default("TEXT") // TEXT, IMAGE, VIDEO, FILE, AUDIO
+  file_url        String?
+  file_name       String?
+  file_size       Int?
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  conversation    Conversation  @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender          User          @relation(fields: [sender_id], references: [id], onDelete: Cascade)
+  read_receipts   MessageRead[]
+
+  @@index([conversation_id, created_at])
+  @@map("messages")
+}
+
+model MessageRead {
+  id         String   @id @default(uuid())
+  message_id String
+  user_id    String
+  read_at    DateTime @default(now())
+
+  message    Message  @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([message_id, user_id])
+  @@map("message_reads")
+}

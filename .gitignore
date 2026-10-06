@@ -1,0 +1,25 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Dependencies and generated output
+node_modules/
+**/node_modules/
+client/dist/
+**/dist/
+*.log
+
+# Local database and uploaded user files
+server/prisma/*.db
+server/prisma/*.db-journal
+server/uploads/*
+!server/uploads/.gitkeep
+
+# Local editor and OS files
+.DS_Store
+.vscode/
+.idea/
