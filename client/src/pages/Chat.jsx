@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar/Sidebar';
 import ChatWindow from '../components/Chat/ChatWindow';
+import IncomingCallModal from '../components/Call/IncomingCallModal';
+import CallModal from '../components/Call/CallModal';
+import CallAlertToast from '../components/Call/CallAlertToast';
 import { useSocket } from '../hooks/useSocket';
 import { useConversationStore } from '../store/conversationStore';
 
@@ -25,6 +28,11 @@ const Chat = () => {
       <ChatWindow
         onOpenSidebar={() => setIsMobileSidebarOpen(true)}
       />
+
+      {/* Real-time Voice and Video Calling Screens & Alerts */}
+      <IncomingCallModal />
+      <CallModal />
+      <CallAlertToast />
     </div>
   );
 };

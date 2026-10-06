@@ -5,6 +5,9 @@ import { useSocketStore } from '../store/socketStore';
 import { usePresenceStore } from '../store/presenceStore';
 import { useConversationStore } from '../store/conversationStore';
 import { useMessageStore } from '../store/messageStore';
+import { useCallStore } from '../store/callStore';
+import { webrtcService } from '../services/webrtcService';
+import { stopAllCallSounds } from '../services/soundService';
 
 export const useSocket = () => {
   const token = useAuthStore((s) => s.token);
@@ -126,6 +129,94 @@ export const useSocket = () => {
       bulkUpdateReceipts(data.messageIds, data.userId, data.readAt);
     });
 
+    // WebRTC Calling Signaling Events
+    socket.on('call:incoming', (data) => {
+      useCallStore.getState().receiveIncomingCall(data);
+    });
+
+    socket.on('call:accepted', async (data) => {
+      const callStore = useCallStore.getState();
+      stopAllCallSounds();
+      useCallStore.setState({ callState: 'CONNECTING' });
+
+      try {
+        webrtcService.initPeerConnection({
+          onIceCandidate: (candidate) => {
+            socket.emit('call:ice-candidate', { callId: data.callId, candidate });
+          },
+          onRemoteStream: (remStream) => {
+            useCallStore.setState({ remoteStream: remStream });
+          },
+          onConnectionState: (connState) => {
+            if (connState === 'connected') {
+              useCallStore.getState().startDurationTimer();
+              useCallStore.setState({ callState: 'CONNECTED' });
+            } else if (connState === 'failed' || connState === 'disconnected') {
+              useCallStore.getState().showAlert('Connection interrupted. Retrying...', 'warning');
+            }
+          },
+          onStats: (statsData) => {
+            useCallStore.setState({ stats: statsData });
+          },
+        });
+
+        const offer = await webrtcService.createOffer();
+        socket.emit('call:offer', { callId: data.callId, sdp: offer });
+      } catch (err) {
+        console.error('[WebRTC] Failed to send offer on call acceptance:', err);
+        callStore.endCall('Failed to establish peer connection');
+      }
+    });
+
+    socket.on('call:offer', async (data) => {
+      try {
+        const answer = await webrtcService.createAnswer(data.sdp);
+        socket.emit('call:answer', { callId: data.callId, sdp: answer });
+      } catch (err) {
+        console.error('[WebRTC] Error handling offer:', err);
+      }
+    });
+
+    socket.on('call:answer', async (data) => {
+      try {
+        await webrtcService.handleAnswer(data.sdp);
+      } catch (err) {
+        console.error('[WebRTC] Error handling answer:', err);
+      }
+    });
+
+    socket.on('call:ice-candidate', async (data) => {
+      try {
+        await webrtcService.addIceCandidate(data.candidate);
+      } catch (err) {
+        console.error('[WebRTC] Error adding ICE candidate:', err);
+      }
+    });
+
+    socket.on('call:rejected', (data) => {
+      useCallStore.getState().handleRemoteEnd(data.reason || 'Call was declined');
+    });
+
+    socket.on('call:cancelled', () => {
+      useCallStore.getState().handleRemoteEnd('Caller cancelled the call');
+    });
+
+    socket.on('call:busy', (data) => {
+      useCallStore.getState().handleRemoteEnd(data.reason || 'User is busy in another call');
+    });
+
+    socket.on('call:unavailable', (data) => {
+      useCallStore.getState().handleRemoteEnd(data.reason || 'User is currently offline');
+    });
+
+    socket.on('call:ended', (data) => {
+      useCallStore.getState().handleRemoteEnd(data.reason || 'Call ended');
+    });
+
+    socket.on('call:error', (data) => {
+      useCallStore.getState().showAlert(data.error || 'Call error', 'error');
+    });
+
     return () => {
       socket.off('connect');
       socket.off('disconnect');
@@ -138,6 +229,17 @@ export const useSocket = () => {
       socket.off('typing:stop');
       socket.off('message:read:update');
       socket.off('message:read:bulk_update');
+      socket.off('call:incoming');
+      socket.off('call:accepted');
+      socket.off('call:offer');
+      socket.off('call:answer');
+      socket.off('call:ice-candidate');
+      socket.off('call:rejected');
+      socket.off('call:cancelled');
+      socket.off('call:busy');
+      socket.off('call:unavailable');
+      socket.off('call:ended');
+      socket.off('call:error');
     };
   }, [token, isAuthenticated, currentUser?.id]);
 

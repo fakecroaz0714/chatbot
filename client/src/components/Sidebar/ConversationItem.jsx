@@ -1,7 +1,6 @@
 import React from 'react';
 import StatusBadge from '../Presence/StatusBadge';
 import { usePresence } from '../../hooks/usePresence';
-import { useConversationStore } from '../../store/conversationStore';
 
 const ConversationItem = ({ conversation, isSelected, onClick }) => {
   const otherUserId = conversation.type === 'DIRECT' ? conversation.otherUser?.id : null;

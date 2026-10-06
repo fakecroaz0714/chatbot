@@ -6,6 +6,7 @@ import { socketAuthMiddleware } from './socketAuth.js';
 import { handlePresenceOnConnect, handlePresenceOnDisconnect } from './presenceHandler.js';
 import { registerMessageHandlers } from './messageHandler.js';
 import { registerTypingHandlers } from './typingHandler.js';
+import { registerCallHandlers, handleCallOnDisconnect } from './callHandler.js';
 import { corsOrigin } from '../utils/cors.js';
 
 export const initSocketServer = (httpServer) => {
@@ -69,13 +70,15 @@ export const initSocketServer = (httpServer) => {
     // Register presence handlers
     await handlePresenceOnConnect(io, socket);
 
-    // Register message and typing handlers
+    // Register message, typing, and call signaling handlers
     registerMessageHandlers(io, socket);
     registerTypingHandlers(io, socket);
+    registerCallHandlers(io, socket);
 
     // Disconnect event
     socket.on('disconnect', async (reason) => {
       console.log(`[Socket.IO] User disconnected: ${user.username} (${socket.id}) reason: ${reason}`);
+      handleCallOnDisconnect(io, socket);
       await handlePresenceOnDisconnect(io, socket);
     });
   });

@@ -166,6 +166,18 @@ Services started:
 | `message:read:update` | Server → Client | `{ messageId, conversationId, userId, readAt }` | Broadcasts read receipt |
 | `typing:start` | Client → Server | `{ conversationId }` | Triggers "User is typing..." |
 | `typing:stop` | Client → Server | `{ conversationId }` | Clears typing indicator |
+| `call:initiate` | Client → Server | `{ targetUserId, conversationId, type }` | Initiates WebRTC voice/video call session |
+| `call:ringing` | Server → Caller | `{ callId, targetUserId, type, targetUser }` | Confirms recipient device is ringing |
+| `call:incoming` | Server → Callee | `{ callId, type, conversationId, caller }` | Delivers incoming call dialog to recipient |
+| `call:accept` | Callee → Server | `{ callId }` | Accepts call and transitions session to connected |
+| `call:accepted` | Server → Caller | `{ callId, type, callee }` | Signals caller to create and emit WebRTC offer |
+| `call:offer` | Peer ↔ Server | `{ callId, sdp }` | Authenticated exchange of WebRTC SDP offer |
+| `call:answer` | Peer ↔ Server | `{ callId, sdp }` | Authenticated exchange of WebRTC SDP answer |
+| `call:ice-candidate` | Peer ↔ Server | `{ callId, candidate }` | Authenticated exchange of ICE candidate |
+| `call:reject` | Peer → Server | `{ callId, reason }` | Callee declines or caller cancels call |
+| `call:busy` | Server → Caller | `{ targetUserId, reason }` | Emitted when target is already engaged in a call |
+| `call:unavailable` | Server → Caller | `{ targetUserId, reason }` | Emitted when target is currently offline |
+| `call:ended` | Server → Peers | `{ callId, reason, endedBy }` | Terminates call and triggers media track cleanup |
 
 ---
 

@@ -9,7 +9,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   const login = useAuthStore((s) => s.login);
-  const register = useAuthStore((s) => s.register);
   const isLoading = useAuthStore((s) => s.isLoading);
   const error = useAuthStore((s) => s.error);
   const clearError = useAuthStore((s) => s.clearError);
@@ -19,20 +18,6 @@ const Login = () => {
     clearError();
     const result = await login(loginId, password);
     if (result.success) {
-      navigate('/');
-    }
-  };
-
-  // Quick Demo Auto-login helper: if demo user doesn't exist, automatically registers them!
-  const handleQuickDemo = async (username, email, pwd) => {
-    clearError();
-    let res = await login(username, pwd);
-    if (!res.success) {
-      // If login failed, auto-register the demo user
-      await register(username, email, pwd);
-      res = await login(username, pwd);
-    }
-    if (res.success) {
       navigate('/');
     }
   };
@@ -94,33 +79,6 @@ const Login = () => {
             )}
           </button>
         </form>
-
-        <div className="demo-accounts">
-          <div className="demo-title">⚡ Instant Demo Accounts (1-Click Test)</div>
-          <div className="demo-btns">
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={() => handleQuickDemo('Alex', 'alex@example.com', 'password123')}
-            >
-              👤 Alex
-            </button>
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={() => handleQuickDemo('Rahul', 'rahul@example.com', 'password123')}
-            >
-              👤 Rahul
-            </button>
-            <button
-              type="button"
-              className="demo-btn"
-              onClick={() => handleQuickDemo('Chandru', 'chandru@example.com', 'password123')}
-            >
-              👤 Chandru
-            </button>
-          </div>
-        </div>
 
         <div className="auth-footer">
           Don't have an account?{' '}

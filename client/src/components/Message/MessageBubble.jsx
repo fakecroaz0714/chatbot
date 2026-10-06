@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, CheckCheck, FileText, Download, Play, Music } from 'lucide-react';
+import { Check, CheckCheck, FileText, Download } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 
 const MessageBubble = ({ message, isGroup }) => {

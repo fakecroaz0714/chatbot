@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, MessageSquare, UserCheck } from 'lucide-react';
+import { X, Search, MessageSquare } from 'lucide-react';
 import api from '../../services/api';
 import { useConversationStore } from '../../store/conversationStore';
 import StatusBadge from '../Presence/StatusBadge';
@@ -125,7 +125,7 @@ const UserSearchModal = ({ isOpen, onClose }) => {
             </div>
           ) : users.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-              No other users found. Register another account or test with demo users!
+              No other users found. Register another account or invite teammates!
             </div>
           ) : (
             users.map((u) => (
