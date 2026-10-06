@@ -172,8 +172,9 @@ To produce a signed release APK for Google Play or enterprise distribution:
 
 1. **Generate a keystore** (if you don't already have one):
    ```bash
-   keytool -genkey -v -keystore halalchat-release.keystore -alias halalchat -keyalg RSA -keysize 2048 -validity 10000
+   ./scripts/create-keystore.sh halalchat-release.keystore halalchat
    ```
+   *(Or if running `keytool` manually, ensure `export JAVA_HOME="$HOME/.jdk/jdk-21/Contents/Home"` is set).*
    > ⚠️ **Important**: Never commit `.keystore` or `.jks` files or signing passwords to Git!
 
 2. **Sign the APK**:

@@ -4,6 +4,26 @@ set -e
 # HalalChat Release APK Signing Helper
 # Usage: ./scripts/sign-release-apk.sh <path_to_keystore> <key_alias> [output_signed_apk]
 
+# Detect or default JAVA_HOME
+if [ -z "$JAVA_HOME" ]; then
+  if [ -d "$HOME/.jdk/jdk-21/Contents/Home" ]; then
+    export JAVA_HOME="$HOME/.jdk/jdk-21/Contents/Home"
+  elif [ -x "/usr/libexec/java_home" ]; then
+    export JAVA_HOME=$(/usr/libexec/java_home -v 21 2>/dev/null || /usr/libexec/java_home 2>/dev/null || echo "")
+  fi
+fi
+
+if [ -n "$JAVA_HOME" ]; then
+  export PATH="$JAVA_HOME/bin:$PATH"
+fi
+
+# Detect or default ANDROID_HOME
+if [ -z "$ANDROID_HOME" ]; then
+  if [ -d "$HOME/Library/Android/sdk" ]; then
+    export ANDROID_HOME="$HOME/Library/Android/sdk"
+  fi
+fi
+
 KEYSTORE="$1"
 ALIAS="$2"
 OUTPUT="${3:-apk/HalalChat-release.apk}"

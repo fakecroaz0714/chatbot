@@ -33,10 +33,11 @@ In a native Android Capacitor app, the WebView does not run from `window.locatio
 
 To produce a signed release APK (`HalalChat-release.apk`):
 
-1. If you do not already have a release keystore, generate one:
+1. If you do not already have a release keystore, generate one using the included helper:
    ```bash
-   keytool -genkey -v -keystore halalchat-release.keystore -alias halalchat -keyalg RSA -keysize 2048 -validity 10000
+   ./scripts/create-keystore.sh halalchat-release.keystore halalchat
    ```
+   *(Or if running `keytool` manually, ensure `export JAVA_HOME="$HOME/.jdk/jdk-21/Contents/Home"` is set).*
    *(Keep your keystore file and passwords private. Do not commit `.keystore` or `.jks` files to git).*
 
 2. Run the included signing script:
