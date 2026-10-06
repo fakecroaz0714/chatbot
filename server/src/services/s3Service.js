@@ -83,6 +83,14 @@ export const generatePresignedUploadUrl = async (fileName, mimeType, fileSize) =
   const key = generateStorageKey(fileName);
 
   if (!isS3Configured || !s3Client) {
+    if (process.env.VERCEL) {
+      const error = new Error(
+        'File uploads are not configured for production. Configure AWS S3 storage to enable attachments.'
+      );
+      error.statusCode = 503;
+      throw error;
+    }
+
     return {
       isS3: false,
       key,

@@ -24,7 +24,7 @@ export const getPresignedUrl = async (req, res, next) => {
       fileName,
     });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return res.status(error.statusCode || 400).json({ error: error.message });
   }
 };
 

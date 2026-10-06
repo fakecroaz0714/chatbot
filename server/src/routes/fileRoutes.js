@@ -8,21 +8,19 @@ import { authenticate } from '../middleware/authMiddleware.js';
 
 const router = Router();
 
-// Ensure uploads directory exists
+// Vercel function filesystems are read-only (apart from ephemeral /tmp).
+// Keep the local disk fallback for development; production file uploads use S3.
+const isVercel = Boolean(process.env.VERCEL);
 const uploadsDir = path.resolve('uploads');
-if (!fs.existsSync(uploadsDir)) {
+if (!isVercel && !fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Multer storage
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const uniqueName = `${uuidv4()}${ext}`;
-    cb(null, uniqueName);
+    cb(null, `${uuidv4()}${ext}`);
   },
 });
 
@@ -34,6 +32,18 @@ const upload = multer({
 router.use(authenticate);
 
 router.post('/presigned-url', getPresignedUrl);
-router.post('/upload-local', upload.single('file'), uploadLocalFile);
+router.post(
+  '/upload-local',
+  (req, res, next) => {
+    if (isVercel) {
+      return res.status(503).json({
+        error: 'Local file uploads are unavailable in production. Configure S3 storage to enable attachments.',
+      });
+    }
+    return next();
+  },
+  upload.single('file'),
+  uploadLocalFile
+);
 
 export default router;

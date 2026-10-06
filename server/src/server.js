@@ -49,12 +49,15 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Apply rate limiting to all API routes
 app.use('/api', apiLimiter);
 
-// Static uploads directory (Section 13 local fallback)
-const uploadsDir = path.resolve('uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// Vercel function filesystems are read-only outside /tmp and do not persist
+// between invocations. Keep the disk-backed upload fallback for local runs only.
+if (!process.env.VERCEL) {
+  const uploadsDir = path.resolve('uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+  app.use('/uploads', express.static(uploadsDir));
 }
-app.use('/uploads', express.static(uploadsDir));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
