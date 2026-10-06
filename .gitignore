@@ -26,6 +26,7 @@ server/uploads/*
 
 # Built APK binaries
 *.apk
+*.idsig
 
 # Android Keystores and local credentials
 *.jks
