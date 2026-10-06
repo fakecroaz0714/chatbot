@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Zap, Lock, User, Mail, ArrowRight, Loader2 } from 'lucide-react';
+import { Lock, User, Mail, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 const Register = () => {
@@ -27,14 +27,13 @@ const Register = () => {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-header">
-          <div
-            className="brand-icon"
-            style={{ width: '48px', height: '48px', margin: '0 auto' }}
-          >
-            <Zap size={26} />
-          </div>
+          <img
+            src="/halalchat-logo.svg"
+            alt="HalalChat"
+            style={{ height: '42px', margin: '0 auto 16px auto', display: 'block' }}
+          />
           <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">Join PulseChat for real-time collaboration</p>
+          <p className="auth-subtitle">Join HalalChat for real-time collaboration</p>
         </div>
 
         {error && <div className="error-alert" style={{ marginBottom: '16px' }}>{error}</div>}

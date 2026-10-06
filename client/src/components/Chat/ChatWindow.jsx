@@ -14,12 +14,14 @@ const ChatWindow = ({ onOpenSidebar }) => {
     return (
       <div className="chat-window">
         <div className="empty-chat">
-          <div className="empty-chat-icon">
-            <MessageSquare size={40} />
-          </div>
-          <h2>Welcome to PulseChat</h2>
+          <img
+            src="/halalchat-app-icon.svg"
+            alt="HalalChat"
+            style={{ width: '72px', height: '72px', marginBottom: '16px', borderRadius: '20px' }}
+          />
+          <h2>Welcome to HalalChat</h2>
           <p>
-            An event-driven real-time messaging platform powered by Socket.IO, Redis presence,
+            An event-driven real-time messaging platform powered by Socket.IO, WebRTC calling,
             PostgreSQL persistence, and S3 file sharing.
           </p>
 

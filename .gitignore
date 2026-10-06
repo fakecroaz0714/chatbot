@@ -23,3 +23,14 @@ server/uploads/*
 .DS_Store
 .vscode/
 .idea/
+
+# Built APK binaries
+*.apk
+
+# Android Keystores and local credentials
+*.jks
+*.keystore
+client/android/local.properties
+client/android/.gradle/
+client/android/app/build/
+client/android/build/

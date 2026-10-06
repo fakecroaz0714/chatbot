@@ -1,14 +1,21 @@
 import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? 'http://localhost:5001' : '');
+import { getApiUrl } from '../utils/config';
 
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL: `${getApiUrl()}/api`,
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Dynamically refresh baseURL before request to support runtime URL changes
+api.interceptors.request.use((config) => {
+  const currentBase = `${getApiUrl()}/api`;
+  if (config.baseURL !== currentBase) {
+    config.baseURL = currentBase;
+  }
+  return config;
 });
 
 // Request interceptor to attach JWT token

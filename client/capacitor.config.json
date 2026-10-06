@@ -1,0 +1,12 @@
+{
+  "appId": "com.halalchat.app",
+  "appName": "HalalChat",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -1,7 +1,5 @@
 import { io } from 'socket.io-client';
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ||
-  (import.meta.env.DEV ? 'http://localhost:5001' : window.location.origin);
+import { getSocketUrl } from '../utils/config';
 
 let socket = null;
 
@@ -13,7 +11,8 @@ export const connectSocket = (token) => {
     socket.disconnect();
   }
 
-  socket = io(SOCKET_URL, {
+  const socketUrl = getSocketUrl();
+  socket = io(socketUrl, {
     auth: { token },
     transports: ['websocket', 'polling'],
     reconnection: true,

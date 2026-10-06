@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquarePlus, Search, Zap } from 'lucide-react';
+import { MessageSquarePlus, Search } from 'lucide-react';
 import ConversationList from './ConversationList';
 import UserProfileBar from './UserProfileBar';
 import UserSearchModal from './UserSearchModal';
@@ -26,10 +26,11 @@ const Sidebar = ({ isMobileOpen, onCloseMobile }) => {
       <aside className={`sidebar ${!isMobileOpen ? 'hidden-mobile' : ''}`}>
         <div className="sidebar-header">
           <div className="brand-logo">
-            <div className="brand-icon">
-              <Zap size={20} />
-            </div>
-            <span className="brand-name">PulseChat</span>
+            <img
+              src="/halalchat-logo.svg"
+              alt="HalalChat"
+              style={{ height: '34px', objectFit: 'contain', display: 'block' }}
+            />
           </div>
 
           <div className="sidebar-actions">

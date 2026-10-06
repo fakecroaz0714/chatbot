@@ -1,34 +1,36 @@
-# ⚡ PulseChat — Real-Time Event-Driven Messenger
+# 🌙 HalalChat — Real-Time Event-Driven Messenger
 
-A production-grade, event-driven real-time chat application built with **React**, **Node.js / Express**, **Socket.IO**, **PostgreSQL (Prisma)**, **Redis**, and **AWS S3**.
+A modern, production-grade, event-driven real-time chat and calling application built with **React**, **Capacitor (Android)**, **Node.js / Express**, **Socket.IO**, **WebRTC**, **PostgreSQL (Prisma)**, **Redis**, and **AWS S3**.
 
 ---
 
 ## 1. Architecture Overview
 
 ```text
-                    CHAT APPLICATION
-                          │
-             ┌────────────┼────────────┐
-             │            │            │
-             ▼            ▼            ▼
-           REST       WebSocket       S3
-             │            │            │
-             ▼            ▼            ▼
-        History/API    Live events    Files
-             │            │
-             └──────┬─────┘
-                    ▼
-               PostgreSQL
-                    +
-                  Redis
+                    HALALCHAT APPLICATION
+                 (Web Browser & Android App)
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+              ▼               ▼               ▼
+            REST          WebSocket          S3
+              │               │               │
+              ▼               ▼               ▼
+         History/API     Live events        Files
+              │          & WebRTC Calls       │
+              └───────────────┬───────────────┘
+                              ▼
+                         PostgreSQL
+                              +
+                            Redis
 ```
 
 - **REST API**: Persistent history retrieval, cursor pagination, authentication, user search.
-- **WebSocket (Socket.IO)**: Low-latency live events (instant messaging, presence, debounced typing indicators, delivery and read receipts).
+- **WebSocket (Socket.IO)**: Low-latency live events (instant messaging, presence, debounced typing indicators, delivery and read receipts, WebRTC call signaling).
 - **PostgreSQL (Prisma)**: Source of truth for users, conversations, memberships, and message records.
 - **Redis**: Multi-device online presence tracking, connection state, and horizontal Socket.IO pub/sub scaling (with automatic in-memory fallback for local zero-config development).
 - **AWS S3**: Secure direct-to-bucket file uploads via presigned URLs (with local disk fallback for dev).
+- **Capacitor Android**: Native Android WebView container enabling cross-platform mobile app distribution with full WebRTC audio/video call support.
 
 ---
 
@@ -37,35 +39,37 @@ A production-grade, event-driven real-time chat application built with **React**
 ```text
 chatbot/
 │
-├── client/                     # React + Vite frontend
+├── client/                     # React + Vite + Capacitor frontend
+│   ├── android/                # Native Android Studio project (Capacitor)
+│   │   └── app/
+│   │       ├── src/main/AndroidManifest.xml
+│   │       └── src/main/res/   # HalalChat adaptive launcher icons & branding
+│   ├── public/
+│   │   ├── halalchat-logo.svg
+│   │   └── halalchat-app-icon.svg
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── Chat/           # ChatHeader, ChatWindow, MessageInput, TypingIndicator
-│   │   │   ├── Message/        # MessageBubble, MessageList (cursor pagination)
-│   │   │   ├── Sidebar/        # Sidebar, ConversationList, UserSearchModal, UserProfileBar
-│   │   │   ├── Presence/       # StatusBadge (online/offline indicator)
-│   │   │   └── FileUpload/     # FilePreview
+│   │   ├── components/         # Chat, Message, Sidebar, CallDialog, Presence
 │   │   ├── pages/              # Login, Register, Chat
-│   │   ├── hooks/              # useSocket, useChat, usePresence
-│   │   ├── services/           # api (axios), socket (socket.io client)
-│   │   ├── store/              # Zustand stores (auth, conversation, message, presence, socket)
-│   │   └── styles/             # Modern CSS tokens, dark theme, micro-animations
-│   ├── Dockerfile
-│   └── nginx.conf
+│   │   ├── services/           # api, socket, webrtc
+│   │   └── utils/              # config.js (cross-platform API/Socket resolution)
+│   ├── capacitor.config.json   # Capacitor configuration (App ID: com.halalchat.app)
+│   └── vite.config.js
 │
 ├── server/                     # Node.js + Express + Socket.IO backend
 │   ├── src/
 │   │   ├── controllers/        # auth, user, conversation, message, file
 │   │   ├── routes/             # authRoutes, userRoutes, conversationRoutes, fileRoutes
-│   │   ├── services/           # redisService (multi-device presence), s3Service (presigned URLs)
-│   │   ├── socket/             # socketServer, socketAuth, messageHandler, presenceHandler, typingHandler
-│   │   ├── middleware/         # authMiddleware, rateLimiter, errorHandler
-│   │   ├── db/                 # prisma client
-│   │   └── server.js           # Server entrypoint with Helmet, CORS, and Socket.IO
-│   ├── prisma/
-│   │   ├── schema.prisma       # Active schema (SQLite zero-dependency local / PostgreSQL ready)
-│   │   └── schema.postgres.prisma # Production PostgreSQL schema
-│   └── Dockerfile
+│   │   ├── socket/             # socketServer, callHandler, messageHandler, presenceHandler
+│   │   └── utils/              # cors.js (configured for web & Capacitor Android origins)
+│   └── prisma/
+│
+├── apk/                        # Generated Android APK artifacts
+│   ├── HalalChat-debug.apk
+│   └── HalalChat-release-unsigned.apk
+│
+├── scripts/
+│   ├── build-android.sh        # Automated Android build script (debug/release)
+│   └── sign-release-apk.sh     # Production release APK signing script
 │
 ├── docker-compose.yml          # PostgreSQL, Redis, Server, and Client production stack
 ├── .env.example                # Environment variables template
@@ -79,6 +83,8 @@ chatbot/
 ### Prerequisites
 - Node.js >= 18
 - npm >= 9
+- Java JDK 21 (for Android builds)
+- Android SDK (for Android builds)
 
 ### Local Development (Zero-Dependency Mode)
 The application is preconfigured with zero-friction fallbacks:
@@ -118,38 +124,75 @@ The application is preconfigured with zero-friction fallbacks:
 
 ---
 
-## 4. Multi-User Real-Time Testing
+## 4. Android Application Packaging
 
-Open **two separate browser windows** (or one normal and one incognito window):
-1. **Window A**: Open `http://localhost:5173` and click **👤 Alex** (Instant 1-click test account).
-2. **Window B**: Open `http://localhost:5173` and click **👤 Rahul** (Instant 1-click test account).
-3. In Window A, click the `+` button in the sidebar, search for `Rahul`, and click the chat icon.
-4. **Test Real-Time Features**:
-   - **Live Messaging**: Type a message in Window A — Window B receives it instantly.
-   - **Typing Indicator**: Start typing in Window B — Window A displays *"Rahul is typing..."* with animated bouncing dots.
-   - **Read Receipts**: When Window B views the message, Window A's checkmarks change from single ✓ to double blue ✓✓.
-   - **Online Presence**: Close Window B or disconnect — Window A displays Rahul's status transition from green (Online) to grey (Offline).
-   - **File Sharing**: Click the paperclip icon in Window A and send an image or document.
+HalalChat includes first-class Android support powered by Capacitor:
+- **Application ID**: `com.halalchat.app`
+- **Application Label**: `HalalChat`
+- **Permissions**: Camera (`android.permission.CAMERA`), Audio/Microphone (`android.permission.RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`), Internet, Network State.
+
+### Cross-Platform API & WebSocket Endpoint Resolution
+Inside the native Android WebView (`http://localhost` / `capacitor://localhost`), relative API paths do not automatically point to the backend. HalalChat resolves backend endpoints dynamically:
+1. **Build Time**: Set `VITE_API_URL` during client build:
+   ```bash
+   VITE_API_URL="https://your-api.example.com" npm --prefix client run build
+   ```
+2. **Android Emulator Default**: If `VITE_API_URL` is omitted, native Android defaults to `http://10.0.2.2:5001`.
+3. **Runtime Override**: The server URL can be customized at runtime without rebuilding:
+   ```javascript
+   localStorage.setItem('halalchat_server_url', 'https://your-api.example.com');
+   ```
+
+### Building the Android APK
+
+1. **Build Debug APK**:
+   ```bash
+   # Using the build script:
+   ./scripts/build-android.sh debug
+
+   # Or using npm:
+   npm run android:build
+   ```
+   **Output**: `apk/HalalChat-debug.apk` (and `client/android/app/build/outputs/apk/debug/app-debug.apk`).
+   *This APK is signed with the standard Android debug keystore and is immediately shareable and installable on test devices/emulators.*
+
+2. **Build Unsigned Release APK**:
+   ```bash
+   ./scripts/build-android.sh release
+
+   # Or using npm:
+   npm run android:release
+   ```
+   **Output**: `apk/HalalChat-release-unsigned.apk` (and `client/android/app/build/outputs/apk/release/app-release-unsigned.apk`).
+   *This APK is an unsigned release build optimized for production distribution.*
+
+### Signing the Release APK
+
+To produce a signed release APK for Google Play or enterprise distribution:
+
+1. **Generate a keystore** (if you don't already have one):
+   ```bash
+   keytool -genkey -v -keystore halalchat-release.keystore -alias halalchat -keyalg RSA -keysize 2048 -validity 10000
+   ```
+   > ⚠️ **Important**: Never commit `.keystore` or `.jks` files or signing passwords to Git!
+
+2. **Sign the APK**:
+   ```bash
+   ./scripts/sign-release-apk.sh halalchat-release.keystore halalchat apk/HalalChat-release.apk
+   ```
+   The verified, signed release APK will be generated at `apk/HalalChat-release.apk`.
 
 ---
 
-## 5. Production Deployment with Docker
+## 5. Testing Real-Time Messaging & Calling
 
-To deploy the entire production stack (PostgreSQL, Redis, Node.js API, and Nginx-backed React Client):
-
-```bash
-# 1. Configure environment variables, then replace POSTGRES_PASSWORD and JWT_SECRET
-cp .env.example .env
-
-# 2. Start all services
-docker-compose up --build -d
-```
-
-Services started:
-- `client`: `http://localhost:5173`
-- `server`: `http://localhost:5001`
-- `postgres`: `localhost:5432`
-- `redis`: `localhost:6379`
+1. Open `http://localhost:5173` in two separate browser windows (or browser + Android device).
+2. Register two accounts (e.g. `user1` and `user2`) or sign in.
+3. Start a conversation and test:
+   - **Live Messaging**: Instant text delivery with delivery (`✓`) and read (`✓✓`) receipts.
+   - **Typing Indicators**: Real-time typing indicators with debounce.
+   - **Presence**: Real-time online/offline status badge.
+   - **Voice & Video Calling**: Click the phone or video camera icon to initiate a 1-on-1 WebRTC call with camera toggle, mic mute/unmute, and hang-up controls.
 
 ---
 
@@ -185,6 +228,8 @@ Services started:
 
 - **JWT Session Verification**: Checked on all REST requests and Socket handshake.
 - **Conversation Authorization**: Every message send or read operation validates `ConversationMember` relations in PostgreSQL before proceeding.
+- **CORS Protection**: Whitelisted for production domain, local dev, and Android Capacitor origins (`capacitor://localhost`, `http://localhost`, `https://localhost`).
+- **Client Bundle Isolation**: No server secrets, database credentials, or JWT signing secrets are exposed to the client or Android bundle.
 - **Rate Limiting**: `express-rate-limit` prevents brute-force authentication and spam.
 - **Security Headers**: `helmet` configured with cross-origin policies.
-- **S3 Upload Safety**: Random UUID-based object keys (`uploads/YYYY/MM/<uuid>.<ext>`) prevent directory traversal and filename collisions.
+

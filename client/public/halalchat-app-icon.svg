@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">HalalChat app icon</title>
+  <desc id="desc">A forest-green chat bubble with a warm-gold crescent and star on a soft ivory-green background.</desc>
+  <defs>
+    <linearGradient id="bubble" x1="88" y1="70" x2="422" y2="442" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#137A60"/>
+      <stop offset="1" stop-color="#0A493B"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="150" fill="#F2F7F3"/>
+  <path d="M91 174c0-38.7 31.3-70 70-70h135c74.6 0 135 60.4 135 135v36c0 74.6-60.4 135-135 135h-59l-73 52v-60c-43-18.7-73-61.5-73-111V174Z" fill="url(#bubble)"/>
+  <path d="M230 168a76 76 0 1 0 87 120 63 63 0 1 1-87-120Z" fill="#F4C95D"/>
+  <path d="m321 174 9.5 19.2 21.2 3.1-15.4 15 3.6 21.2-18.9-10-18.9 10 3.6-21.2-15.4-15 21.3-3.1L321 174Z" fill="#F4C95D"/>
+</svg>

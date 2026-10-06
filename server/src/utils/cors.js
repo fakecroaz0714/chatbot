@@ -1,4 +1,10 @@
-const LOCAL_ORIGINS = ['http://localhost:5173', 'http://localhost:3000'];
+const ANDROID_ORIGINS = [
+  'capacitor://localhost',
+  'http://localhost',
+  'https://localhost',
+];
+
+const LOCAL_ORIGINS = ['http://localhost:5173', 'http://localhost:3000', ...ANDROID_ORIGINS];
 
 const vercelOrigin = (host) => (host ? `https://${host.replace(/\/$/, '')}` : null);
 
